@@ -23,11 +23,14 @@ def predict_sentiment(data):
     device = get_device()
     classifier = pipeline(
         "text-classification",
-        model="tabularisai/multilingual-sentiment-analysis",
+        model="clapAI/modernBERT-base-multilingual-sentiment",
+        #"nlptown/bert-base-multilingual-uncased-sentiment",
+        #"tabularisai/multilingual-sentiment-analysis",
         device=device
     )
     
     predictions = classifier(data)
+    print(predictions)
     probas_dict = {}
     if isinstance(predictions, list) and predictions:
         prediction = predictions[0]
@@ -35,6 +38,7 @@ def predict_sentiment(data):
             label = prediction['label']
             score = prediction['score']
             probas_dict[label] = score
+    print(probas_dict)            
     return probas_dict
 
 def chunk_email_to_sentences(email_content):

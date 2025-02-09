@@ -63,18 +63,18 @@ def generate_prompt(user_input):
 if 'chat_messages' not in st.session_state:
     st.session_state.chat_messages = [{
         "role": "assistant",
-        "content": "Hello! I'm your Email Sentiment Analyzer and Assistant. Paste your email content for analysis, or ask me to help you with your email."
+        "content": "Hello! I'm your Document Sentiment Analyzer and Assistant. Paste your text (email, review, etc.) for analysis, or ask me to help you improve it."
     }]
 
 # Set page config
 st.set_page_config(
-    page_title="Email Sentiment Analyzer",
+    page_title="Document Sentiment Analyzer",
     layout="wide"
 )
 
 # Add title and description
-st.title("✉️ Email Sentiment Analyzer & Assistant")
-st.caption("🚀 Analyze email sentiment and get help with your emails using AI")
+st.title("📝 Document Sentiment Analyzer & Assistant")
+st.caption("🚀 Analyze sentiment and get help with your documents (emails, reviews, etc.) using AI")
 
 # Create two columns for the layout
 left_col, right_col = st.columns([2, 1])
@@ -86,27 +86,27 @@ with left_col:
         with st.chat_message(message["role"]):
             st.write(message["content"])
 
-    # Email input through chat (positioned at bottom)
-    if email_content := st.chat_input("Type or paste your email or your request here..."):
-        if email_content.strip():
+    # Document input through chat (positioned at bottom)
+    if document_content := st.chat_input("Type or paste your document (email, review, etc.) or your request here..."):
+        if document_content.strip():
             with st.spinner("Processing..."):
-                # Add user's email to chat
-                st.session_state.chat_messages.append({"role": "user", "content": email_content})
-                st.chat_message("user").write(email_content)
+                # Add user's document to chat
+                st.session_state.chat_messages.append({"role": "user", "content": document_content})
+                st.chat_message("user").write(document_content)
 
                 # Check if this is the first user message after assistant's initial greeting
                 is_first_user_message = len([msg for msg in st.session_state.chat_messages if msg["role"] == "user"]) == 1
 
                 if is_first_user_message:
-                    # First message is treated as email for sentiment analysis
-                    analysis = mf.analyze_email_sentiment(email_content)
+                    # First message is treated as document for sentiment analysis
+                    analysis = mf.analyze_email_sentiment(document_content)
 
-                    assistant_message = f"📊 Sentiment Analysis of your email:\n\n"
+                    assistant_message = f"📊 Sentiment Analysis of your document:\n\n"
                     assistant_message += f"Overall Sentiment: **{analysis['dominant_emotion'].upper()}**\n\n"
-                    assistant_message += "Sentence-by-Sentence Analysis:\n"
+                    assistant_message += "Segment-by-Segment Analysis:\n"
 
-                    # Split email by both sentences and newlines
-                    raw_sentences = mf.chunk_email_to_sentences(email_content)
+                    # Split document by both sentences and newlines
+                    raw_sentences = mf.chunk_email_to_sentences(document_content)
                     sentences = []
                     for sentence in raw_sentences:
                         # Split further by newlines and filter out empty lines
@@ -122,20 +122,20 @@ with left_col:
                         assistant_message += f"> {sentence}\n"
                         assistant_message += f"Sentiment: **{emotion.upper()}** (Confidence: {score:.1%})\n"
                 else:
-                    # Subsequent messages are treated as commands/requests related to the *previous* email
+                    # Subsequent messages are treated as commands/requests related to the previous document
                     text_generator = load_text_generation_pipeline()
 
-                    # Get the previous email content
-                    previous_email_content = ""
+                    # Get the previous document content
+                    previous_document = ""
                     user_messages = [msg for msg in st.session_state.chat_messages if msg["role"] == "user"]
                     if len(user_messages) > 1:
-                        previous_email_content = user_messages[-2]['content']
+                        previous_document = user_messages[-2]['content']
 
                     # **IMPROVED PROMPT:**
                     messages = [
                         {
                             "role": "user", 
-                            "content": f"You are an AI email assistant. Help with this email request:\n\nPrevious email:\n{previous_email_content}\n\nUser request:\n{email_content}"
+                            "content": f"You are an AI writing assistant. Help with this request:\n\nPrevious text:\n{previous_document}\n\nUser request:\n{document_content}"
                         }
                     ]
 
@@ -149,17 +149,17 @@ with left_col:
                             top_p=0.9
                         )
 
-                        assistant_message = "I am sorry, I could not generate a relevant email response. Please try again."
+                        assistant_message = "I am sorry, I could not generate a relevant response. Please try again."
                         if response:
                             # Extract the generated text from Gemma's response
                             generated_text = response[0]["generated_text"][-1]["content"].strip()
                             assistant_message = generated_text
 
                             if len(assistant_message) < 10 or "I am sorry" in assistant_message:
-                                assistant_message = "I can help with emails, but I need a clearer request. Could you please be more specific about what you'd like me to do with the email?"
+                                assistant_message = "I can help improve your text, but I need a clearer request. Could you please be more specific about what you'd like me to do?"
 
                     except Exception as e:
-                        assistant_message = f"Sorry, there was an error generating the email response. Please try again. Error details: {e}"
+                        assistant_message = f"Sorry, there was an error generating the response. Please try again. Error details: {e}"
                 # Add analysis/response to chat
                 st.session_state.chat_messages.append({"role": "assistant", "content": assistant_message})
                 st.chat_message("assistant").write(assistant_message)
@@ -168,19 +168,19 @@ with left_col:
 with right_col:
     st.subheader("About")
     st.info("""
-    This tool analyzes the emotional tone of your emails and can act as your email assistant using AI.
+    This tool analyzes the emotional tone of your documents (emails, reviews, etc.) and can help you improve them using AI.
 
     How to use:
-    1. **First Message:** Type or paste your email in the chat to analyze its sentiment.
-    2. **Subsequent Messages:** Ask me to help with your email, like "fix this email", "rewrite it", "respond to it", etc.
-    3. I will use the previous email as context to understand your requests.
+    1. **First Message:** Type or paste your text in the chat to analyze its sentiment.
+    2. **Subsequent Messages:** Ask me to help improve your text, like "make it more positive", "rewrite it professionally", "fix the tone", etc.
+    3. I will use the previous text as context to understand your requests.
     """)
 
     # Add a clear chat button
     if st.button("Clear Chat History", type="secondary", key="clear_chat_settings"):
         st.session_state.chat_messages = [{
             "role": "assistant",
-            "content": "Hello! I'm your Email Sentiment Analyzer and Assistant. Paste your email content for analysis, or ask me to help you with your email."
+            "content": "Hello! I'm your Document Sentiment Analyzer and Assistant. Paste your text (email, review, etc.) for analysis, or ask me to help you improve it."
         }]
         st.rerun()
 
@@ -193,7 +193,7 @@ with right_col:
         # Get the first analysis message
         first_analysis = None
         for message in st.session_state.chat_messages:
-            if message["role"] == "assistant" and "📊 Sentiment Analysis of your email:" in message["content"]:
+            if message["role"] == "assistant" and "📊 Sentiment Analysis of your document:" in message["content"]:
                 first_analysis = message["content"]
                 break
 
@@ -201,4 +201,4 @@ with right_col:
             st.info(first_analysis)
 
     else:
-        st.info("Enter an email on the left panel to see the sentiment analysis results here.")
+        st.info("Enter your text on the left panel to see the sentiment analysis results here.")

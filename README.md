@@ -1,12 +1,12 @@
-# Email Sentiment Analyzer & Assistant
+#  Sentiment Analyzer & Assistant
 
-An application that analyzes email sentiment and provides AI-powered email assistance
+An application that analyzes document sentiment and provides AI-powered email assistance
 
 Another fun little project I made! :3
 
 ## Features
 
-- 📊 Email sentiment analysis
+- 📊 Documents sentiment analysis
 - 💬 AI-powered email assistance (rewriting, responding, fixing)
 - 📱 User-friendly chat interface
 - 📈 Detailed sentence-by-sentence sentiment breakdown
@@ -36,4 +36,4 @@ Another fun little project I made! :3
 
 - Streamlit for the web interface
 - HuggingFace Transformers for sentiment analysis and text generation
-- Google's Gemma-2-2b for email assistance
+- Google's Gemma-2-2b for assistance

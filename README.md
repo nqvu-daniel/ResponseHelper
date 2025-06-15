@@ -21,6 +21,9 @@ Another fun little project I made! :3
 3. Set up Hugging Face authentication:
    - Get your Hugging Face token from https://huggingface.co/settings/tokens
    - Set it as an environment variable: `HUGGINGFACE_TOKEN=your_token`
+```bash
+echo 'export HUGGINGFACE_TOKEN="your_actual_token_here"' >> ~/.zshrc && source ~/.zshrc
+```
    - Or add it to Streamlit secrets
 
 ## Usage

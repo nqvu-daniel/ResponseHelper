@@ -24,6 +24,7 @@ def predict_sentiment(data):
     classifier = pipeline(
         "text-classification",
         model="clapAI/modernBERT-base-multilingual-sentiment",
+        #model="./fine_turned_model"
         #"nlptown/bert-base-multilingual-uncased-sentiment",
         #"tabularisai/multilingual-sentiment-analysis",
         device=device
